@@ -1,0 +1,127 @@
+import { useState } from "react";
+import Newproject from "./components/Newproject";
+import NoProjectSelected from "./components/NoProjectSelected";
+import ProjectSideBar from "./components/ProjectSideBar";
+import SelectedProject from "./components/SelectedProject";
+
+function App() {
+
+const[projectsState,setProjectsState]=useState({
+  selectProjectId:undefined,
+  projects: [],
+  tasks: [],
+});
+
+function handleAddTask(text){
+  setProjectsState((prevState) =>{
+    const taskId=Math.random();
+    const newTask={
+      text: text,
+      projectId: prevState.selectProjectId,
+      id: taskId,
+    }
+    return{
+      ...prevState,
+      tasks: [newTask, ...prevState.tasks],
+    };
+  });
+}
+
+
+function handleDeleteTask(id){
+  setProjectsState((prevState) =>{
+    return{
+      ...prevState,
+      tasks: prevState.tasks.filter((task)=> task.id !== id),
+    }
+  })
+
+}
+
+function handleSelectProject(id){
+  setProjectsState(prevState =>{
+    return{
+      ...prevState,
+      selectProjectId: id,
+    }
+  })
+  
+
+}
+
+function handleStartAddProject(){
+  setProjectsState(prevState =>{
+    return{
+      ...prevState,
+      selectProjectId: null,
+    }
+  })
+}
+
+
+function handleCancelAddProject(){
+  setProjectsState(prevState =>{
+    return{
+      ...prevState,
+      selectProjectId:undefined,
+    }
+  })
+}
+function handleAddProject(projectData){
+  setProjectsState(prevState =>{
+    const projectId=Math.random();
+    const newProject={
+      ...projectData,
+      id:projectId
+    }
+    return{
+      ...prevState,
+      selectProjectId:undefined,
+      projects:[...prevState.projects,newProject]
+    }
+  });
+}
+
+function handleDeleteProject(){
+  setProjectsState(prevState =>{
+    return{
+      ...prevState,
+      selectProjectId:undefined,
+      projects:prevState.projects.filter((project)=>project.id !==prevState.selectProjectId)
+    }
+  })
+}
+
+const selectedProject=projectsState.projects.find(
+  project => project.id === projectsState.selectProjectId
+)
+let content=( 
+<SelectedProject 
+project={selectedProject}
+onDelete={handleDeleteProject}
+onAddTask={handleAddTask}
+onDeleteTask={handleDeleteTask}
+tasks={projectsState.tasks}
+/>
+); 
+
+if(projectsState.selectProjectId===null){
+  content =<Newproject onAdd={handleAddProject} onCancel={handleCancelAddProject}/>
+}else if(projectsState.selectProjectId ===undefined){
+  content=<NoProjectSelected  onStartAddProject={handleStartAddProject}/>
+
+}
+  return (
+    <main className="h-screen my-8 flex gap-8">
+      <ProjectSideBar 
+      onSelectProject={handleSelectProject}
+      onStartAddProject={handleStartAddProject} 
+      projects={projectsState.projects}
+      selectedProjectId={projectsState.selectProjectId}
+      />
+      {content}
+    </main>
+  );
+}
+
+export default App;
